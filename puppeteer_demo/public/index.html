@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <style>
+        * {
+            -webkit-print-color-adjust: exact;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .login-container {
+            max-width: 300px;
+            margin: 100px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button onclick="login()" type="submit">Login</button>
+        <p id="message"></p>
+    </div>
+
+    <script>
+        function login() {
+            var username = document.getElementById('username').value;
+            var password = document.getElementById('password').value;
+            var message = document.getElementById('message');
+
+            // 假设的用户名和密码，实际应用中不应该在前端硬编码
+            var correctUsername = 'admin';
+            var correctPassword = 'password';
+
+            if (username === correctUsername && password === correctPassword) {
+                message.textContent = 'Login successful!';
+                message.style.color = 'green';
+            } else {
+                message.textContent = 'Login failed!';
+                message.style.color = 'red';
+            }
+        }
+    </script>
+</body>
+
+</html>

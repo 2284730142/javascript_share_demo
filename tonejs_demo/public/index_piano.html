@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Tone.js</title>
+  <style>
+    /* 高亮样式 */
+    .key-active-high {
+      background: yellow !important;
+    }
+
+    .key-active-low {
+      background: red !important;
+    }
+
+    .play-button-wrapper {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    #piano {
+      display: flex;
+    }
+
+    .container {
+      position: relative;
+      display: flex;
+      /* 使白键水平排列 */
+    }
+
+    .key {
+      border: 1px solid #000;
+      height: 120px;
+      margin: 1px;
+      vertical-align: bottom;
+      position: relative;
+      /* 为黑键定位做准备 */
+    }
+
+    .white-key {
+      width: 23px;
+      background-color: white;
+      color: #000;
+      font-size: 12px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .black-key {
+      width: 15px;
+      background-color: black;
+      height: 80px;
+      position: absolute;
+      z-index: 1;
+      top: 0;
+      left: 0;
+      color: #fff;
+      font-size: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="piano">
+
+  </div>
+  <div class="play-button-wrapper">
+    <button id="play-button">Play</button>
+  </div>
+  <script>
+    function createPiano() {
+      const piano = document.getElementById('piano');
+      const notes = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+      const octaveCount = 4; // 从A0到C8，共有7个完整的八度加上一个额外的C
+      let octaveStart = 0;
+
+      for (let octave = 0; octave <= octaveCount; octave++) {
+        const container = document.createElement('div');
+        container.className = 'container';
+
+        notes.forEach((note, index) => {
+          const whiteKey = document.createElement('div');
+          whiteKey.className = 'key white-key';
+          whiteKey.dataset.note = note + (octaveStart + octave + 2);
+          whiteKey.innerText = note + (octaveStart + octave + 2);
+          container.appendChild(whiteKey);
+
+          // 黑键位置调整
+          if (['A', 'C', 'D', 'F', 'G'].includes(note) && octave <= octaveCount) {
+            const blackKey = document.createElement('div');
+            blackKey.className = 'key black-key';
+            blackKey.dataset.note = note + '#' + (octaveStart + octave + 2);
+            blackKey.innerText = note + '#' + (octaveStart + octave + 2);
+            // 根据白键位置调整黑键位置
+            blackKey.style.left = (25 - 17 / 2) + (index * (25 + 2)) + 'px';
+            container.appendChild(blackKey);
+          }
+        });
+
+        piano.appendChild(container);
+      }
+    }
+
+    createPiano();
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/tone@latest/build/Tone.min.js"></script>
+  <script src="demo_piano.js"></script>
+</body>
