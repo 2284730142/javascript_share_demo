@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>情人节特效</title>
+  <style>
+    * {
+      margin: 0px;
+      padding: 0px;
+    }
+
+    html,
+    body,
+    #myCanvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    #typed-output {
+      position: absolute;
+      left: 20px;
+      top: 40px;
+      color: aliceblue;
+      font-size: 36px;
+      z-index: 9999;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="myCanvas"></div>
+  <div id="typed-output"></span>
+    <script src="https://cdn.jsdelivr.net/npm/pixi.js@7.x/dist/pixi.min.js"></script>
+    <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
+    <script>
+      window.onload = () => {
+        let myCanvas = document.getElementById('myCanvas');
+        console.log(myCanvas.clientWidth, myCanvas.clientHeight);
+        // 创建Pixi应用
+        const app = new PIXI.Application({
+          width: myCanvas.clientWidth,         // 画布宽度
+          height: myCanvas.clientHeight,       // 画布高度
+          backgroundColor: 0x000000,        // 背景颜色
+          resolution: 1,
+        });
+        document.getElementById('myCanvas').appendChild(app.view);
+
+        // 加载爱心
+        const heartTexture = PIXI.Texture.from('/217d9cf17c71a161abf491ec0172ac3d.png');
+        const heart = new PIXI.Sprite(heartTexture);
+
+        // 设置心形图案的位置和缩放
+        heart.x = app.screen.width / 2;
+        heart.y = app.screen.height / 2;
+        heart.anchor.set(0.5);
+        heart.scale.set(1);
+
+        app.stage.addChild(heart);
+
+        // 假设我们要裁剪的区域是从(50, 50)开始，宽高为(100, 100)
+        const frame = new PIXI.Rectangle(300, 60, 800, 600);
+        const croppedTexture = new PIXI.Texture(heartTexture.baseTexture, frame);
+
+        const croppedHeart = new PIXI.Sprite(croppedTexture);
+
+        // 设置裁剪区域精灵的位置和锚点
+        croppedHeart.x = app.screen.width / 2;
+        croppedHeart.y = app.screen.height / 2;
+        croppedHeart.anchor.set(0.55);
+        croppedHeart.scale.set(1.1);
+
+        app.stage.addChild(croppedHeart);
+
+        // 创建动画变量
+        let heartBeat = 0;
+
+        // 添加动画效果
+        app.ticker.add(() => {
+          // 心跳效果
+          heartBeat += 0.1;
+          croppedHeart.scale.set(1 + 0.05 * Math.sin(heartBeat));
+
+          // 上下浮动效果
+          croppedHeart.y += Math.sin(heartBeat) * 1.2;
+        });
+
+        // 创建星星
+        function createStar() {
+          const star = new PIXI.Graphics();
+          star.beginFill(0xffffff);
+
+          // 定义五角星的顶点
+          const points = [];
+          for (let i = 0; i < 5; i++) {
+            // 外部顶点
+            points.push(
+              Math.cos((0.8 * i - 0.5) * Math.PI) * 10,
+              Math.sin((0.8 * i - 0.5) * Math.PI) * 10
+            );
+            // 内部顶点
+            points.push(
+              Math.cos((0.8 * i - 0.2) * Math.PI) * 5,
+              Math.sin((0.8 * i - 0.2) * Math.PI) * 5
+            );
+          }
+
+          // 绘制五角星
+          star.drawPolygon(points);
+          star.endFill();
+
+          // 设置星星的位置和缩放
+          star.x = Math.random() * app.screen.width;
+          star.y = Math.random() * app.screen.height;
+          star.pivot.set(10, 10); // 设置旋转中心为星星的中心
+
+          app.stage.addChild(star);
+
+          // 添加闪烁效果
+          app.ticker.add(() => {
+            star.alpha = 0.5 + Math.sin(app.ticker.lastTime / 200) * 0.5;
+          });
+        }
+
+        // 创建一定数量的星星
+        for (let i = 0; i < 100; i++) {
+          createStar();
+        }
+
+        // 花瓣的图片
+        const petalTexture = PIXI.Texture.from('/1707804064633.jpg');
+
+        function createPetal() {
+          const petal = new PIXI.Sprite(petalTexture);
+          petal.x = Math.random() * app.screen.width;
+          petal.y = Math.random() * app.screen.height;
+          petal.anchor.set(0.5);
+          petal.scale.set(0.1 + Math.random() * 0.1);
+          app.stage.addChild(petal);
+
+          // 添加动画效果
+          app.ticker.add(() => {
+            petal.y += 1;
+            petal.rotation += 0.01;
+            if (petal.y > app.screen.height) {
+              petal.y = -petal.height;
+            }
+          });
+        }
+
+        // 创建一定数量的花瓣
+        for (let i = 0; i < 10; i++) {
+          createPetal();
+        }
+
+        // 创建文字效果
+        let options = {
+          strings: [
+            "你好，这是一份祝福，请查收！",
+            "情人节的钟声即将敲响，",
+            "无论你是独自一人还是幸福成双，",
+            "这一刻，我想对你说：",
+            "你是独一无二的，你的笑容比任何礼物都要珍贵。",
+            "PS技术不太行，我尝试着做了些东西来表达我的心意，",
+            "它可能不完美，但请相信，我所有的好意都包含其中。",
+            "今天，希望我的这份微不足道的祝福能让你的心灵感到一丝温暖，",
+            "即使我们相隔万里，我的祝福也能穿越屏幕，送到你的身边。",
+            "愿你的情人节温馨、甜蜜，愿你的每一天都被爱环绕。",
+            "记得，爱情不仅仅是浪漫的烛光晚餐和昂贵的礼物，",
+            "它更是日常点滴中的关心与陪伴。",
+            "所以，请接收我的祝福，就像接收一束光，照亮你的每一个角落。",
+            "祝你情人节快乐！"
+          ],
+          typeSpeed: 40, // 打字速度
+          backSpeed: 0, // 回退速度
+          loop: false, // 不循环播放
+          showCursor: true, // 显示光标
+          cursorChar: '丨', // 光标字符
+          backDelay: 800, // 回退前的延迟时间
+          startDelay: 500, // 开始打字前的延迟时间
+          smartBackspace: false, // 关闭智能回退
+          loopCount: 0, // 循环次数，0 表示无限循环，这里不需要循环
+          onComplete: (self) => { self.cursor.remove(); } // 打字完成后移除光标
+        };
+
+        var typed = new Typed('#typed-output', options);
+      }
+    </script>
+</body>
