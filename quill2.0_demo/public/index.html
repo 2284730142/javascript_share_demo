@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Quill</title>
+  <!-- 加入Highlight -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+  <!-- 加入Quill -->
+  <link href="https://cdn.jsdelivr.net/npm/quill@2.0.0-rc.2/dist/quill.snow.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/quill@2.0.0-rc.2/dist/quill.js"></script>
+  <!-- 加入Katex -->
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+  <style>
+    .ql-editor .ql-date {
+      background-color: #f0f0f0;
+      border-radius: 4px;
+      padding: 2px 4px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- 控制条 -->
+  <div id="toolbar-container">
+    <span class="ql-formats">
+      <select class="ql-font"></select>
+      <select class="ql-size"></select>
+    </span>
+    <span class="ql-formats">
+      <button class="ql-bold"></button>
+      <button class="ql-italic"></button>
+      <button class="ql-underline"></button>
+      <button class="ql-strike"></button>
+    </span>
+    <span class="ql-formats">
+      <select class="ql-color"></select>
+      <select class="ql-background"></select>
+    </span>
+    <span class="ql-formats">
+      <button class="ql-script" value="sub"></button>
+      <button class="ql-script" value="super"></button>
+    </span>
+    <span class="ql-formats">
+      <button class="ql-header" value="1"></button>
+      <button class="ql-header" value="2"></button>
+      <button class="ql-blockquote"></button>
+      <button class="ql-code-block"></button>
+    </span>
+    <span class="ql-formats">
+      <button class="ql-list" value="ordered"></button>
+      <button class="ql-list" value="bullet"></button>
+      <button class="ql-indent" value="-1"></button>
+      <button class="ql-indent" value="+1"></button>
+    </span>
+    <span class="ql-formats">
+      <button class="ql-direction" value="rtl"></button>
+      <select class="ql-align"></select>
+    </span>
+    <span class="ql-formats">
+      <button class="ql-link"></button>
+      <button class="ql-image"></button>
+      <button class="ql-video"></button>
+      <button class="ql-formula"></button>
+    </span>
+    <span class="ql-formats">
+      <button class="ql-clean"></button>
+    </span>
+    <span class="ql-formats">
+      <button class="ql-insertDate">Date</button>
+    </span>
+  </div>
+  <!-- 编辑器 -->
+  <div id="editor">
+  </div>
+
+  <script>
+    // 定义一个自定义的 blot 来处理日期
+    const Inline = Quill.import('blots/inline');
+
+    console.log(Inline);
+
+    class DateBlot extends Inline {
+      static blotName = 'date';
+      static tagName = 'div';
+      static className = 'ql-date';
+      static create(value) {
+        let node = super.create(value);
+        node.setAttribute('class', this.className);
+        node.innerText = value;
+        console.log(node);
+        return node;
+      }
+
+      static value(node) {
+        console.log(`value node: `, node);
+        return node.innerText; // 获取Blot实例的表示值
+      }
+    }
+
+    Quill.register(DateBlot, true);
+
+    // 初始化Quill编辑器
+    const quill = new Quill('#editor', {
+      modules: {
+        syntax: true,
+        toolbar: '#toolbar-container',
+      },
+      placeholder: '请在这里输入内容...',
+      theme: 'snow',
+    });
+
+    console.log(quill);
+
+    // 获取工具栏的 insertDate 按钮
+    const insertDateButton = document.querySelector('.ql-insertDate');
+
+    // 为按钮添加点击事件监听器
+    insertDateButton.addEventListener('click', function () {
+      // 获取当前日期并格式化
+      const date = new Date();
+      const dateString = date.toLocaleDateString();
+
+      // 获取编辑器的光标位置
+      const range = quill.getSelection(true);
+      if (range) {
+        // 在光标位置插入自定义 blot
+        quill.insertEmbed(range.index, 'date', dateString);
+        // 移动光标到插入 blot 的后面
+        // 紧接着插入换行符
+        quill.insertText(range.index + dateString.length, '\n');
+        // 更新光标位置到新的行
+        quill.setSelection(range.index + dateString.length + 1);
+      }
+    });
+  </script>
+</body>
