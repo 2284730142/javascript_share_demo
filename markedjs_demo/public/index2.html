@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Marked.js 高级示例</title>
+</head>
+
+<body>
+
+    <div id="content" style="width: 400px; padding: 12px; border: 1px solid rgba(0, 0, 0, 0.1);"></div>
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked-highlight/lib/index.umd.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked-katex-extension/lib/index.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked-emoji/lib/index.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked-footnote/dist/index.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+
+    <script type="module">
+        import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
+        import { Octokit } from "https://esm.sh/@octokit/rest";
+        const { markedHighlight } = globalThis.markedHighlight;
+        const markedKatex = globalThis.markedKatex;
+        const { markedEmoji } = globalThis.markedEmoji;
+        const markedFootnote = globalThis.markedFootnote;
+        mermaid.initialize({ startOnLoad: false });
+        const run = async () => {
+            const octokit = new Octokit();
+            // Get all the emojis available to use on GitHub.
+            const res = await octokit.rest.emojis.get();
+            console.log(res.data);
+            const emojis = res.data;
+
+            // Markdown 文本示例
+            let markdownString = `
+## 自定义列表显示
+
+- [x] 任务列表项1
+- [ ] 任务列表项2
+
+## 代码高亮
+
+\`\`\`javascript
+console.log("Hello, World!");
+\`\`\`
+
+## KaTeX 公式
+
+这是一个行内公式 $E=mc^2$ 的例子。
+
+这是一个块级公式的例子：
+
+$$
+\\begin{align}
+a &= b + c \\\\
+d &= e + f
+\\end{align}
+$$
+
+## Mermaid 图表
+
+\`\`\`mermaid
+graph TD;
+    A-->B;
+    A-->C;
+    B-->D;
+    C-->D;
+\`\`\`
+
+
+## 脚注
+
+Here is a simple footnote[^1].
+
+[^1]: My reference.
+`;
+            // 高亮处理
+            marked.use(markedHighlight({
+                langPrefix: 'hljs language-',
+                highlight(code, lang, info) {
+                    const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+                    return hljs.highlight(code, { language }).value;
+                }
+            }))
+
+            // KaTeX 语法
+            marked.use(markedKatex({
+                throwOnError: false
+            }));
+
+            // emoji 语法
+            marked.use(markedEmoji({
+                emojis,
+                unicode: false,
+            }));
+
+            // 脚注语法
+            marked.use(markedFootnote());
+
+            // 自定义渲染器以支持任务列表
+            const renderer = new marked.Renderer();
+            renderer.code = (code, infostring, escaped) => {
+                console.log(code, infostring, escaped);    
+                if (infostring === "mermaid") {
+                    return `<div class="mermaid">${code}</div>`;
+                }
+                return code;
+            };
+            renderer.listitem = function (text, task, checked) {
+                console.log(text, task, checked);
+                return `<li style="list-style: none;">${text}</li>`;
+            };
+            marked.use({
+                renderer: renderer,
+            });
+
+            document.getElementById('content').innerHTML = marked.parse(markdownString);
+            mermaid.init(undefined, ".mermaid");
+        }
+
+        run().then(() => {
+            console.log('done');
+        });
+    </script>
+</body>
+
+</html>

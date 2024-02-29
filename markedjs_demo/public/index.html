@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Marked.js 示例</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div id="content"></div>
+
+    <script>
+        // Markdown 文本
+        let markdownString = '## 标题\n\n- 列表项1\n- 列表项2\n\n```javascript\nconsole.log("代码块");\n```';
+
+        // 使用 Marked.js 转换 Markdown 文本为 HTML
+        document.getElementById('content').innerHTML = marked.parse(markdownString);
+    </script>
+</body>
+</html>
