@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>D3.js 示例</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<button id="update">更新数据</Button>
+
+<body>
+    <script>
+        const dataset = [25, 7, 5, 26, 11];
+
+        // 设置SVG的宽度和高度
+        const w = 300;
+        const h = 100;
+        const barPadding = 1;
+
+        // 设置边距
+        const margin = { top: 20, right: 20, bottom: 30, left: 40 };
+
+        // 创建SVG元素
+        const svg = d3.select("body")
+            .append("svg")
+            .attr("width", w + margin.left + margin.right)
+            .attr("height", h + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        // 绑定数据并创建条形
+        svg.selectAll("rect")
+            .data(dataset)
+            .enter()
+            .append("rect")
+            .attr("x", (d, i) => i * (w / dataset.length))
+            .attr("y", d => h - d * 4) // 乘以4为了放大显示效果
+            .attr("width", w / dataset.length - barPadding)
+            .attr("height", d => d * 4)
+            .attr("fill", "teal");
+
+        // 创建工具提示
+        const tooltip = d3.select("body")
+            .append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0)
+            .style("position", "absolute")
+            .style("background-color", "white")
+            .style("border", "solid")
+            .style("border-width", "1px")
+            .style("border-radius", "5px")
+            .style("padding", "10px")
+            .style("text-align", "center");
+
+        // 更新条形图，添加鼠标事件
+        svg.selectAll("rect")
+            .on("mouseover", (event, d) => {
+                tooltip.transition()
+                    .duration(200)
+                    .style("opacity", .9);
+                tooltip.html(d)
+                    .style("left", (event.pageX) + "px")
+                    .style("top", (event.pageY - 28) + "px");
+            })
+            .on("mouseout", () => {
+                tooltip.transition()
+                    .duration(500)
+                    .style("opacity", 0);
+            });
+
+        // 创建比例尺
+        const xScale = d3.scaleBand()
+            .domain(d3.range(dataset.length))
+            .rangeRound([0, w])
+            .paddingInner(0.05);
+
+        const yScale = d3.scaleLinear()
+            .domain([0, d3.max(dataset)])
+            .range([h, 0]); // 反转y轴的输出范围
+
+        // 创建条形
+        svg.selectAll("rect")
+            .data(dataset)
+            .enter()
+            .append("rect")
+            .attr("x", (d, i) => xScale(i))
+            .attr("y", d => yScale(d))
+            .attr("width", xScale.bandwidth())
+            .attr("height", d => h - yScale(d))
+            .attr("fill", "teal");
+
+        // 创建坐标轴
+        const xAxis = d3.axisBottom(xScale).ticks(dataset.length);
+        const yAxis = d3.axisLeft(yScale).ticks(5);
+
+
+        // 添加X轴
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + h + ")")
+            .call(xAxis);
+
+        // 添加Y轴
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis);
+
+        document.getElementById("update").addEventListener("click", function () {
+            // 更新数据集
+            const newDataset = [11, 25, 22, 18, 7];
+
+            // 更新yScale的domain
+            yScale.domain([0, d3.max(newDataset)]);
+
+            // 重新绑定数据
+            const bars = svg.selectAll("rect")
+                .data(newDataset);
+
+            // 更新已存在的条形
+            bars.transition() // 开始一个过渡
+                .duration(1000) // 过渡持续1000毫秒
+                .attr("y", d => yScale(d))
+                .attr("height", d => h - yScale(d))
+                .attr("fill", "navy");
+
+            // 更新Y轴
+            svg.select(".y.axis")
+                .transition()
+                .duration(1000)
+                .call(yAxis);
+        });
+
+    </script>
+</body>
+
+</html>

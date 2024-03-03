@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>D3.js 树图示例</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        .node {
+            border: solid 1px white;
+            font: 10px sans-serif;
+            line-height: 12px;
+            overflow: hidden;
+            position: absolute;
+            text-indent: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        // 设置树图的宽度和高度
+        const width = 960;
+        const height = 600;
+
+        // 创建SVG元素
+        const svg = d3.select("body").append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .style("font", "10px sans-serif");
+
+        // 模拟的层级数据
+        const data = {
+            name: "root",
+            children: [
+                { name: "child #1", value: 500 },
+                { name: "child #2", value: 300 },
+                {
+                    name: "child #3",
+                    children: [
+                        {
+                            name: "grandchild #1",
+                            children: [
+                                { name: "greatgrandchild #1", value: 100 },
+                                { name: "greatgrandchild #2", value: 100 }
+                            ]
+                        },
+                        { name: "grandchild #2", value: 200 }
+                    ]
+                }
+            ]
+        };
+
+        // 创建树图布局
+        const treemap = d3.treemap()
+            .size([width, height])
+            .padding(1)
+            .round(true);
+
+        // 创建根节点，并计算每个节点的位置
+        const root = d3.hierarchy(data)
+            .sum(d => d.value) // 设置每个节点的值
+            .sort((a, b) => b.height - a.height || b.value - a.value); // 排序
+
+        treemap(root);
+
+        // 创建每个节点的矩形
+        const leaf = svg.selectAll("g")
+            .data(root.leaves())
+            .join("g")
+            .attr("transform", d => `translate(${d.x0},${d.y0})`);
+
+        leaf.append("rect")
+            .attr("id", d => (d.leafUid = "leaf-" + d.data.name))
+            .attr("fill", d => d3.interpolateRainbow(d.data.value / 1000))
+            .attr("width", d => d.x1 - d.x0)
+            .attr("height", d => d.y1 - d.y0);
+
+        leaf.append("clipPath")
+            .attr("id", d => (d.clipUid = "clip-" + d.data.name))
+            .append("use")
+            .attr("xlink:href", d => d.leafUid.href);
+
+        leaf.append("text")
+            .attr("clip-path", d => d.clipUid)
+            .selectAll("tspan")
+            .data(d => d.data.name.split(/(?=[A-Z][^A-Z])/g))
+            .join("tspan")
+            .attr("x", 3)
+            .attr("y", (d, i) => 13 + i * 10)
+            .text(d => d);
+
+        // 添加交互效果
+        leaf.on("mouseover", function () {
+            d3.select(this).raise().selectAll("rect").attr("stroke", "#fff").attr("stroke-width", 4);
+        }).on("mouseout", function () {
+            d3.select(this).selectAll("rect").attr("stroke", null);
+        });
+    </script>
+</body>
+
+</html>
